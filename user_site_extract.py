@@ -11,6 +11,8 @@ import time
 import urllib2
 import md5
 
+
+
 pdbx.enable_pystack()
 get_time_total = 0
 
@@ -191,7 +193,7 @@ filter_hosts = [r"[\d\.]*",
                 r".*\.cnzz\.com"
                 r"cdn\.tgp\.qq\.com",
                 r"apple\.www\.letv\.com|ope/.tanx/.com|uestat/.video/.qiyi/.com|dingshi4pc/.qiumibao/.com|pingfore/.qq/.com/",   #08月19日 add filter rules
-                r"chat.chushou.tv"
+                r".*chushou\.tv"
                 r"l\.rcd\.iqiyi\.com",
                 r"show\.re\.taobao\.com|s\.360\.cn|.*synacast\.com|dan\.zhibo8\.cc|googleads\.g\.doubleclick\.net|afp\.csbew\.com|bifen4pc\.qiumibao\.com"]
 
