@@ -236,7 +236,7 @@ f = open('/home/firedata/pantao/url_0819_top')
 url_all = []
 has_run = []
 
-with open('/home/firedata/pantao/list_url_finish0820', 'r') as f:
+with open('/home/firedata/pantao/list_url_finish_test', 'r') as f:
     for i in f:
         has_run.append(i[:-1])
 
