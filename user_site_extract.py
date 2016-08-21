@@ -10,45 +10,58 @@ import pdbx
 import time
 import urllib2
 import md5
+import requests
 
 
 
 pdbx.enable_pystack()
+
 get_time_total = 0
+crowler_count = 0
+inserted_count=0
+lock = threading.Lock()
 
 
 def get_info(url):  # each_url,get_extract return dict_info
     info = {}
 
-    if urllib.urlopen(url).code != 200:
+    get_t1 = time.time()
+
+    try:
+        req_timeout=(2,3)
+        req_header = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+            'Accept': 'text/html;q=0.9,*/*;q=0.8',
+        }
+        req=requests.get(url,headers=req_header,req_timeout=req_timeout)
+    except:
+        print 'requests timeout'
+        logBad(url)
         return {}
 
-    get_t1 = time.time()
-    req_header = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-        'Accept': 'text/html;q=0.9,*/*;q=0.8',
-    }
-    req_timeout = 0.5
-    try:
-        req = urllib2.Request(url, None, req_header)
-        resp = urllib2.urlopen(req, None, req_timeout)
-        content = resp.read()
-    except:
+    if req.status_code!= 200:
+        print 'status_code error'
         logBad(url)
         return {}
 
     get_t2 = time.time()
+
     global get_time_total
     get_time_total += (get_t2 - get_t1)
 
-    extract_t1 = time.time()
+
     det_t1 = time.time()
 
-    encoding = det_encoding(content)
-    content = content.decode(encoding=encoding, errors='ignore')
+    encoding = det_encoding(req.content)
+    content  = req.content.decode(encoding=encoding, errors='ignore')
 
     det_t2 = time.time()
-    soup = BeautifulSoup(content, "html.parser")
+
+    extract_t1 = time.time()
+
+
+    soup = BeautifulSoup(content, "html.parser").head
+
     soup_des = soup.find("meta", attrs={"name": re.compile('description.*', re.I)})
     soup_kw = soup.find("meta", attrs={"name": re.compile('keyword.*', re.I)})
     soup_tags = soup.find("meta", attrs={"name": re.compile('tag.*', re.I)})
@@ -61,74 +74,62 @@ def get_info(url):  # each_url,get_extract return dict_info
         print 'no title'
 
     if soup_des != None:
-
-        try:
-            info['description'] = soup_des['content'].strip()
-        except:
-            print 'no desc'
+        try:info['description'] = soup_des['content'].strip()
+        except:print 'no desc'
 
     if (soup_kw != None):
-        try:
-            info['keywords'] = soup_kw['content'].strip()
-        except:
-            print 'no keywords'
+        try:info['keywords'] = soup_kw['content'].strip()
+        except:print 'no keywords'
 
     if (soup_des != None):
-        try:
-            info['tags'] = soup_tags['content'].strip()
-        except:
-            print 'no tags'
+        try:info['tags'] = soup_tags['content'].strip()
+        except:print 'no tags'
 
     extract_t2 = time.time()
 
-    print 'url:' + url + '   get:' + str(get_t2 - get_t1) + '   extract:' + str(
-        extract_t2 - extract_t1) + '   det:' + str(det_t2 - det_t1)
+    print 'url:' + url + ' get:' + str(get_t2 - get_t1)  + ' det:' + str(det_t2 - det_t1) + ' extract:' + str(
+        extract_t2 - extract_t1)
 
     return info
 
 
-crowler_count = 0;
 
+def list_extract(list_url_part, fout):  # list_url filter and save2mongo
 
-def list_extract(f, fout):  # list_url filter and save2mongo
     global crowler_count
     global get_time_total
+    global inserted_count
 
-    sites = f
-    count = 0
-    count_saved = 0
+    for url_each in list_url_part:
 
-    for j in sites:
-        count += 1
         crowler_count += 1
 
         if crowler_count % 1000 == 0:
-            print 'crowler_count=', str(crowler_count), 'total=', str(crowler_total), 'get_time=', str(get_time_total)
+            print 'crowler_count=', str(crowler_count), 'total=', str(crowler_total), 'get_time=', str(get_time_total),'inserted_count:',str(inserted_count)
             get_time_total = 0
 
-        if isExist(j):
-            write_to_file(fout, j)
+        if isExist(url_each):
+            write_to_file(fout, url_each)              # record has run
             continue
 
         try:
-            write_to_file(fout, j)
-            info = get_info(j)
-            # record has run
+            write_to_file(fout, url_each)              # record has run
 
+
+
+            info = get_info(url_each)
             if info.has_key('title') and info['title'] != '':
 
-                m1 = md5.new()
-                m1.update(j)
-                info['_id'] = m1.hexdigest()
-                info['url'] = j
+                info['_id'] = md5.md5(url_each).hexdigest()
+                info['url'] = url_each
 
                 c = pymongo.MongoClient("10.10.23.101", 50001)
                 db = c.recbrain
-                db['user_behavior0816'].insert(info)
+                db['user_behavior0821'].insert(info)
                 c.close()
+                inserted_count += 1
 
-                print 'inserted: ', j, info['_id']
-                count_saved += 1
+                print 'inserted: ', url_each, info['_id']
 
             else:
                 print 'no title'
@@ -136,15 +137,17 @@ def list_extract(f, fout):  # list_url filter and save2mongo
             print 'can not save'
 
 
+
 def logBad(url):
-    with open('/home/firedata/pantao/bad_url_0819', 'a') as f:
+    with open('/home/firedata/pantao/bad_url_0821', 'a') as f:
         f.writelines(urllib2.urlparse.urlparse(url).netloc + '\n')
 
 
-def splist(l, n):
-    s = len(l) / (n - 1)
 
-    return [l[i:i + s] for i in range(len(l)) if i % s == 0]
+def splist(list_all, n):
+    s = len(list_all) / (n - 1)
+
+    return [list_all[i:i + s] for i in range(len(list_all)) if i % s == 0]
 
 
 filter_hosts = [r"[\d\.]*",
@@ -203,41 +206,38 @@ def acceptUrl(url):
     return re.match(r"^(" + ("|".join(filter_hosts)) + ")$", u.netloc) is None
 
 
+
 def det_encoding(content):
     m = re.search(r'(utf-8|gb2312|gbk|windows-1252|ISO-8859-8)', content, re.I)
     if m is not None:
         return m.group().lower();
-
     return 'GB18030'
+
 
 
 def isExist(url):
     c = pymongo.MongoClient("10.10.23.101", 50001);
     db = c.recbrain;
-    e = db['user_behavior0816'].find({'_id': md5.md5(url).hexdigest()}).count()
+    e = db['user_behavior0821'].find({'_id': md5.md5(url).hexdigest()}).count()
     c.close();
     return e != 0
 
 
-lock = threading.Lock()
-
 
 def write_to_file(f, text):
-    lock.acquire()  # thread blocks at this line until it can obtain lock
-
-    # in this section, only one thread can be present at a time.
-    print >> f, text
-
+    lock.acquire()             # thread blocks at this line until it can obtain lock
+    print >> f, text           # in this section, only one thread can be present at a time.
     lock.release()
+
 
 
 f = open('/home/firedata/pantao/url_0819_top')
 
-sites = []
+url_all = []
 has_run = []
 
-with open('/home/firedata/pantao/list_url_finish', 'r') as f1:
-    for i in f1:
+with open('/home/firedata/pantao/list_url_finish0820', 'r') as f:
+    for i in f:
         has_run.append(i[:-1])
 
 set_has_run = set(has_run)
@@ -245,19 +245,19 @@ set_has_run = set(has_run)
 for i in f:
     i = i[:-1]
     if acceptUrl(i) and i not in set_has_run:
-        sites.append(i)
+        url_all.append(i)
 
-crowler_total = len(sites)
+crowler_total = len(url_all)
 
-sitess = splist(sites, 1000)
+list_url_part = splist(url_all, 1000)
 
 threads = []
 
-f_list_url_finish = open('/home/firedata/pantao/list_url_finish', 'a')
+f_list_url_finish = open('/home/firedata/pantao/list_url_finish_test', 'a')
 
 for i in range(1000):
     print i
-    t = threading.Thread(target=list_extract, args=(sitess[i], f_list_url_finish))
+    t = threading.Thread(target=list_extract, args=(list_url_part[i], f_list_url_finish))
     threads.append(t)
 
 for t in threads:
