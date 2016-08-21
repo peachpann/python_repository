@@ -231,7 +231,6 @@ def write_to_file(f, text):
 
 
 
-f = open('/home/firedata/pantao/url_0819_top')
 
 url_all = []
 has_run = []
@@ -242,10 +241,12 @@ with open('/home/firedata/pantao/list_url_finish_test', 'r') as f:
 
 set_has_run = set(has_run)
 
-for i in f:
-    i = i[:-1]
-    if acceptUrl(i) and i not in set_has_run:
-        url_all.append(i)
+f = open('/home/firedata/pantao/url_0819_top','r')
+with open('/home/firedata/pantao/url_0819_top','r') as f:
+    for i in f:
+        i = i[:-1]
+        if acceptUrl(i) and i not in set_has_run:
+            url_all.append(i)
 
 crowler_total = len(url_all)
 
