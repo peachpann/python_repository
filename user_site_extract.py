@@ -28,12 +28,13 @@ def get_info(url):  # each_url,get_extract return dict_info
     get_t1 = time.time()
 
     try:
-        req_timeout=(2,3)
+        print url
+        req_timeout=(5)
         req_header = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
             'Accept': 'text/html;q=0.9,*/*;q=0.8',
         }
-        req=requests.get(url,headers=req_header,req_timeout=req_timeout)
+        req=requests.get(url,headers=req_header,timeout=req_timeout)
     except:
         print 'requests timeout'
         logBad(url)
