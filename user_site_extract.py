@@ -60,8 +60,8 @@ def get_info(url):          # each_url,get_extract return dict_info
 
     extract_t1 = time.time()
 
-
-    soup = BeautifulSoup(content, "html.parser").head
+    content=re.search(r'<head>([\s\S]*)</head>',content).group()
+    soup = BeautifulSoup(content, "html.parser")
 
     soup_des = soup.find("meta", attrs={"name": re.compile('description.*', re.I)})
     soup_kw = soup.find("meta", attrs={"name": re.compile('keyword.*', re.I)})
