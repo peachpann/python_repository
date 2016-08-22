@@ -22,7 +22,7 @@ inserted_count=0
 lock = threading.Lock()
 
 
-def get_info(url):  # each_url,get_extract return dict_info
+def get_info(url):          # each_url,get_extract return dict_info
     info = {}
 
     get_t1 = time.time()
@@ -95,7 +95,7 @@ def get_info(url):  # each_url,get_extract return dict_info
 
 
 
-def list_extract(list_url_part, fout):  # list_url filter and save2mongo
+def list_extract(list_url_part, fout):          # list_url filter and save2mongo
 
     global crowler_count
     global get_time_total
@@ -110,11 +110,11 @@ def list_extract(list_url_part, fout):  # list_url filter and save2mongo
             get_time_total = 0
 
         if isExist(url_each):
-            write_to_file(fout, url_each)              # record has run
+            write_to_file(fout, url_each)           # record has run
             continue
 
         try:
-            write_to_file(fout, url_each)              # record has run
+            write_to_file(fout, url_each)           # record has run
 
 
 
@@ -196,9 +196,10 @@ filter_hosts = [r"[\d\.]*",
                 r"uestat\.video\.qiyi\.com/"
                 r".*\.cnzz\.com"
                 r"cdn\.tgp\.qq\.com",
-                r"apple\.www\.letv\.com|ope/.tanx/.com|uestat/.video/.qiyi/.com|dingshi4pc/.qiumibao/.com|pingfore/.qq/.com/",   #08月19日 add filter rules
                 r".*chushou\.tv"
                 r"l\.rcd\.iqiyi\.com",
+                r"apple\.www\.letv\.com|ope/.tanx/.com|uestat/.video/.qiyi/.com|dingshi4pc/.qiumibao/.com|pingfore/.qq/.com/",   #08月19日 add filter rules
+                r"^[/d/./:]*|pub/.95xiu/.com|.*:(/d)*|.*edu.cn|.*/.gov/.cn",                                                     #08月22日 add filter rules
                 r"show\.re\.taobao\.com|s\.360\.cn|.*synacast\.com|dan\.zhibo8\.cc|googleads\.g\.doubleclick\.net|afp\.csbew\.com|bifen4pc\.qiumibao\.com"]
 
 
