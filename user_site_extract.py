@@ -140,7 +140,7 @@ def list_extract(list_url_part, fout):          # list_url filter and save2mongo
 
 
 def logBad(url):
-    with open('/home/firedata/pantao/bad_url_0821', 'a') as f:
+    with open('/data6/pantao/user_url/bad_url', 'a') as f:
         f.writelines(urllib2.urlparse.urlparse(url).netloc + '\n')
 
 
@@ -237,14 +237,13 @@ def write_to_file(f, text):
 url_all = []
 has_run = []
 
-with open('/home/firedata/pantao/list_url_finish_test', 'r') as f:
+with open('/data6/pantao/user_url/list_url_finish_test', 'a') as f:
     for i in f:
         has_run.append(i[:-1])
 
 set_has_run = set(has_run)
 
-f = open('/home/firedata/pantao/url_0819_top','r')
-with open('/home/firedata/pantao/url_0819_top','r') as f:
+with open('/data6/pantao/user_url/url0824','r') as f:
     for i in f:
         i = i[:-1]
         if acceptUrl(i) and i not in set_has_run:
@@ -256,7 +255,7 @@ list_url_part = splist(url_all, 1000)
 
 threads = []
 
-f_list_url_finish = open('/home/firedata/pantao/list_url_finish_test', 'a')
+f_list_url_finish = open('/data6/pantao/user_url/list_url_finish_test', 'a')
 
 for i in range(1000):
     print i
