@@ -124,7 +124,7 @@ def list_extract(list_url_part, fout):          # list_url filter and save2mongo
 
                 c = pymongo.MongoClient("10.10.23.101", 50001)
                 db = c.recbrain
-                db['user_behavior0821'].insert(info)
+                db['user_behavior0824'].insert(info)
                 c.close()
                 inserted_count += 1
 
@@ -235,7 +235,7 @@ def write_to_file(f, text):
 url_all = []
 has_run = []
 
-with open('/data6/pantao/user_url/list_url_finish_test', 'a') as f:
+with open('/data6/pantao/user_url/list_url_finish_test', 'r') as f:
     for i in f:
         has_run.append(i[:-1])
 
