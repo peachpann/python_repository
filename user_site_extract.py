@@ -1,8 +1,6 @@
 # encoding=utf-8
 
-import urllib
 from bs4 import BeautifulSoup
-import chardet
 import pymongo
 import threading
 import re
